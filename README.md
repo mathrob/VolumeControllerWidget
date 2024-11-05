@@ -1,6 +1,6 @@
 # Volume Controller Widget V0.1
 
-1. Install ![Python 3.13](https://www.python.org/downloads/)
+1. Install [Python 3.13](https://www.python.org/downloads/)
 
 2. Open Terminal : `pip install PyQt6 pycaw comtypes`
 
