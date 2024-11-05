@@ -1,11 +1,19 @@
-# Volume Controller Widget V0.1
+# Volume Controller Widget
 
-1. Install [Python 3.13](https://www.python.org/downloads/)
+Simple widget to control master and microphone volume. works on **Windows only** at present
 
-2. Open Terminal : `pip install PyQt6 pycaw comtypes`
+## Installation
 
-4. ![Download](https://github.com/mathrob/VolumerController/blob/main/dist/Volume%20Controller%20Widget.exe) `Volume Controller Widget.exe` to /dist/Volume Controller Widget.exe.
+1. Download the installer [here](https://github.com/mathrob/VolumeControllerWidget/blob/main/dist/VolumeControllerWidget_V0.1_Setup.exe)
 
-5. Place `Volume Controller Widget.exe` to any location.
+2. Run the installer and follow instructions
 
-6. Clic on `Volume Controller Widget.exe` to run.
+3. Start the widget :)
+
+---
+
+## Version 0.1 *(Start-up version)*
+
+- Controls master volume
+- Controls microphone volume
+- Works on Windows only
