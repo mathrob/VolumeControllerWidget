@@ -181,49 +181,60 @@ class AudioWidget(QWidget):
         # Toggle mute state for the microphone
         self.is_mic_muted = not self.is_mic_muted
         
-        # Obtenir le microphone par défaut
-        sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
+        try: 
+            # Obtenir le microphone par défaut
+            sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
 
-        # Mute ou rétablir le microphone
-        volume.SetMute(self.is_mic_muted, None)
+            # Mute ou rétablir le microphone
+            volume.SetMute(self.is_mic_muted, None)
+        except Exception as e:
+            print(f"Erreur lors de la gestion du microphone : {e}")
 
         # Update the microphone icon to show or hide the red "X"
         self.update_mic_icon()
 
     def update_volumes(self):
-        # Récupère le volume actuel du haut-parleur
-        sessions = AudioUtilities.GetSpeakers()
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
-        current_volume = int(volume.GetMasterVolumeLevelScalar() * 100)
-        
-        # Met à jour le slider de volume principal si nécessaire
-        if self.master_volume.value() != current_volume:
-            self.master_volume.blockSignals(True)
-            self.master_volume.setValue(current_volume)
-            self.master_volume.blockSignals(False)
+        try:
+            # Récupère le volume actuel du haut-parleur
+            sessions = AudioUtilities.GetSpeakers()
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            current_volume = int(volume.GetMasterVolumeLevelScalar() * 100)
+            
+            # Met à jour le slider de volume principal si nécessaire
+            if self.master_volume.value() != current_volume:
+                self.master_volume.blockSignals(True)
+                self.master_volume.setValue(current_volume)
+                self.master_volume.blockSignals(False)
 
-        # Vérifier si le haut-parleur est muet
-        self.is_master_muted = volume.GetMute()
-        self.speaker_label.setText("🔇" if self.is_master_muted else "🔊")
+            # Vérifier si le haut-parleur est muet
+            self.is_master_muted = volume.GetMute()
+            self.speaker_label.setText("🔇" if self.is_master_muted else "🔊")
+        except Exception as e:
+            print(f"Erreur lors de la gestion du volume du haut-parleur : {e}")
 
-        # Récupère le volume actuel du microphone
-        mic_sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
-        mic_interface = mic_sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        mic_volume = cast(mic_interface, POINTER(IAudioEndpointVolume))
-        mic_current_volume = int(mic_volume.GetMasterVolumeLevelScalar() * 100)
+        try:
+            # Récupère le volume actuel du microphone
+            mic_sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
+            mic_interface = mic_sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            mic_volume = cast(mic_interface, POINTER(IAudioEndpointVolume))
+            mic_current_volume = int(mic_volume.GetMasterVolumeLevelScalar() * 100)
 
-        # Met à jour le slider de volume du microphone si nécessaire
-        if self.mic_volume.value() != mic_current_volume:
-            self.mic_volume.blockSignals(True)
-            self.mic_volume.setValue(mic_current_volume)
-            self.mic_volume.blockSignals(False)
+            # Met à jour le slider de volume du microphone si nécessaire
+            if self.mic_volume.value() != mic_current_volume:
+                self.mic_volume.blockSignals(True)
+                self.mic_volume.setValue(mic_current_volume)
+                self.mic_volume.blockSignals(False)
 
-        # Vérifier si le microphone est muet
-        self.is_mic_muted = mic_volume.GetMute()
-        self.update_mic_icon()  # Met à jour l'icône du microphone en fonction de l'état de sourdine
+            # Vérifier si le microphone est muet
+            self.is_mic_muted = mic_volume.GetMute()
+        except Exception as e:
+            print(f"Erreur lors de la gestion du volume du microphone : {e}")
+
+        # Met à jour l'icône du microphone en fonction de l'état de sourdine
+        self.update_mic_icon()
 
     def closeEvent(self, event):
         # Sauvegarde la position actuelle avant de fermer
@@ -391,19 +402,25 @@ class AudioWidget(QWidget):
         self.setup_auto_start()
     
     def init_volumes(self):
-        # Initialisation du volume principal
-        sessions = AudioUtilities.GetSpeakers()
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
-        current_volume = volume.GetMasterVolumeLevelScalar()
-        self.master_volume.setValue(int(current_volume * 100))
+        try:
+            # Initialisation du volume principal
+            sessions = AudioUtilities.GetSpeakers()
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            current_volume = volume.GetMasterVolumeLevelScalar()
+            self.master_volume.setValue(int(current_volume * 100))
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation du volume du haut-parleur : {e}")
 
-        # Initialisation du volume du microphone
-        mic_sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
-        mic_interface = mic_sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        mic_volume = cast(mic_interface, POINTER(IAudioEndpointVolume))
-        mic_current_volume = mic_volume.GetMasterVolumeLevelScalar()
-        self.mic_volume.setValue(int(mic_current_volume * 100))  # Met à jour le slider du microphone
+        try:
+            # Initialisation du volume du microphone
+            mic_sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
+            mic_interface = mic_sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            mic_volume = cast(mic_interface, POINTER(IAudioEndpointVolume))
+            mic_current_volume = mic_volume.GetMasterVolumeLevelScalar()
+            self.mic_volume.setValue(int(mic_current_volume * 100))  # Met à jour le slider du microphone
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation du volume du microphone : {e}")
     
     def change_master_volume(self, value):
         sessions = AudioUtilities.GetSpeakers()
@@ -412,13 +429,16 @@ class AudioWidget(QWidget):
         volume.SetMasterVolumeLevelScalar(value / 100, None)
     
     def change_mic_volume(self, value):
-        # Récupérer le microphone par défaut
-        sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
-        
-        # Change le volume du microphone
-        volume.SetMasterVolumeLevelScalar(value / 100, None)
+        try:
+            # Récupérer le microphone par défaut
+            sessions = AudioUtilities.GetMicrophone()  # Cela devrait vous donner le microphone par défaut
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            
+            # Change le volume du microphone
+            volume.SetMasterVolumeLevelScalar(value / 100, None)
+        except Exception as e:
+            print(f"Erreur lors du changement du volume du microphone : {e}")
 
     
     def mousePressEvent(self, event):
