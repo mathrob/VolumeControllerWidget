@@ -17,3 +17,5 @@ Simple widget to control master and microphone volume. works on **Windows only**
 - Controls master volume
 - Controls microphone volume
 - Works on Windows only
+- Change widget colors
+- Enables automatic start-up with OS
