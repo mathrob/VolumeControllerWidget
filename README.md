@@ -1,6 +1,6 @@
 # Volume Controller Widget V0.1
 
-1. ![Download]() `Volume Controller Widget.exe` to /dist/Volume Controller Widget.exe.
+1. ![Download](https://github.com/mathrob/VolumerController/blob/main/dist/Volume%20Controller%20Widget.exe) `Volume Controller Widget.exe` to /dist/Volume Controller Widget.exe.
 
 2. Place `Volume Controller Widget.exe` to any location.
 
