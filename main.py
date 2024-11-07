@@ -65,6 +65,7 @@ class AudioWidget(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         
         layout = QVBoxLayout()
+        layout.setSpacing(20)
 
         self.background_style = QPushButton(self)
         self.background_style.setGeometry(self.rect())
@@ -80,27 +81,32 @@ class AudioWidget(QWidget):
         self.master_volume = QSlider(Qt.Orientation.Vertical)
         self.master_volume.setRange(0, 100)
         self.master_volume.valueChanged.connect(self.change_master_volume)
+        self.master_volume.setFixedHeight(200)
         
         self.mic_volume = QSlider(Qt.Orientation.Vertical)
         self.mic_volume.setRange(0, 100)
         self.mic_volume.valueChanged.connect(self.change_mic_volume)
+        self.mic_volume.setFixedHeight(200)
         
         self.speaker_label = QLabel("🔊")
-        self.speaker_label.setFixedSize(48, 48)
+        self.speaker_label.setFixedSize(96, 96)
+        self.speaker_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.speaker_label.mousePressEvent = self.toggle_mute_master
 
         self.mic_label = QLabel("🎤")
-        self.mic_label.setFixedSize(48, 48)
+        self.mic_label.setFixedSize(96, 96)
+        self.mic_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.mic_label.mousePressEvent = self.toggle_mute_mic
         
         options_button = QPushButton("⋮")
-        options_button.setFixedSize(24, 48)
+        options_button.setFixedSize(48, 96)
         options_button.setStyleSheet("color: white; border: none; font-size: 18px;")
         options_button.clicked.connect(self.show_options_menu)
 
         self.apply_style()
         
         controls_layout = QHBoxLayout()
+        controls_layout.setSpacing(30)
         controls_layout.addWidget(self.speaker_label)
         controls_layout.addWidget(self.master_volume)
         controls_layout.addWidget(self.mic_label)
@@ -125,23 +131,31 @@ class AudioWidget(QWidget):
         QWidget {{
             background-color: rgba{QColor(buttons_color).getRgb()[:-1] + (int(buttons_opacity * 255),)};
             border-radius: 10px;
-            padding: 10px;
+            padding: 20px;
         }}
         QSlider::groove:vertical {{
             background: #4A4A4A;
-            width: 20px;
-            border-radius: 5px;
+            width: 40px;
+            border-radius: 10px;
         }}
         QSlider::handle:vertical {{
             background: #007AFF;
-            height: 20px;
-            width: 20px;
-            margin: 0 -4px;
-            border-radius: 10px;
+            height: 40px;
+            width: 40px;
+            margin: 0 -8px;
+            border-radius: 20px;
         }}
         QLabel {{
             color: white;
-            font-size: 16px;
+            font-size: 48px;
+            text-align: center;
+            padding: 10px;
+        }}
+        QPushButton {{
+            color: white;
+            font-size: 48px;
+            border: none;
+            text-align: center;
         }}
         """
         self.setStyleSheet(style)
@@ -164,12 +178,16 @@ class AudioWidget(QWidget):
 
         This method interacts with the system audio APIs to mute or unmute the master volume.
         """
-        sessions = AudioUtilities.GetSpeakers()
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
-
         self.is_master_muted = not self.is_master_muted
-        volume.SetMute(self.is_master_muted, None)
+
+        try:
+            sessions = AudioUtilities.GetSpeakers()
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+
+            volume.SetMute(self.is_master_muted, None)
+        except Exception as e:
+            print(f"Erreur lors de l'initialisation du volume maître : {e}")
 
         self.speaker_label.setText("🔇" if self.is_master_muted else "🔊")
 
@@ -179,7 +197,7 @@ class AudioWidget(QWidget):
 
         This method creates a custom icon with a red strike-through when the microphone is muted.
         """
-        mic_icon = QPixmap(24, 24)
+        mic_icon = QPixmap(64, 64)
         mic_icon.fill(Qt.GlobalColor.transparent)
 
         painter = QPainter(mic_icon)
@@ -492,10 +510,14 @@ class AudioWidget(QWidget):
 
         This method interacts with the system audio APIs to update the master volume level.
         """
-        sessions = AudioUtilities.GetSpeakers()
-        interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        volume = cast(interface, POINTER(IAudioEndpointVolume))
-        volume.SetMasterVolumeLevelScalar(value / 100, None)
+        try:
+            sessions = AudioUtilities.GetSpeakers()
+            interface = sessions.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+            volume = cast(interface, POINTER(IAudioEndpointVolume))
+            
+            volume.SetMasterVolumeLevelScalar(value / 100, None)
+        except Exception as e:
+            print(f"Error while changing the speaker volume: {e}")
 
     def change_mic_volume(self, value):
         """
